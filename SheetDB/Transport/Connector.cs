@@ -125,7 +125,7 @@
             return this._request.CreateRequest(url, this.GetToken());
         }
 
-        public IResponse Send(HttpWebRequest request, HttpMethod method, string payload)
+        public IResponse Send(HttpWebRequest request, HttpMethod method, string payload = "")
         {
             return this._request.Send(request, method, payload);
         }

@@ -6,6 +6,6 @@
     {
         HttpWebRequest CreateRequest(string url);
 
-        IResponse Send(HttpWebRequest request, HttpMethod method, string payload);
+        IResponse Send(HttpWebRequest request, HttpMethod method, string payload = "");
     }
 }
