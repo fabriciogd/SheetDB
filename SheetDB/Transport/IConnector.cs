@@ -4,6 +4,8 @@
 
     public interface IConnector
     {
-        WebClient CreateRequest();
+        HttpWebRequest CreateRequest(string url);
+
+        IResponse Send(HttpWebRequest request, HttpMethod method, string payload);
     }
 }

@@ -11,9 +11,6 @@
     using System.Security.Cryptography.X509Certificates;
     using System.Text;
 
-    /// <summary>
-    /// Transport connector used to authenticate and make HTTP requests
-    /// </summary>
     public class Connector : IConnector
     {
         private readonly string _clientEmail;
@@ -33,13 +30,6 @@
 
         private readonly IRequestFactory _request;
 
-
-        /// <summary>
-        /// Initialize a new instance of <see cref="Connector"/>
-        /// </summary>
-        /// <param name="request">Instance of request factory</param>
-        /// <param name="clientEmail">Email address of the service account</param>
-        /// <param name="privateKey">Private key for access google services</param>
         public Connector(IRequestFactory request, string clientEmail, byte[] privateKey)
         {
             this._request = request;
@@ -113,10 +103,6 @@
             return Encoding.UTF8.GetString(response);
         }
 
-        /// <summary>
-        /// Gets a token to access the drive api
-        /// </summary>
-        /// <returns>Returns a <see cref="OAuth2"/> object</returns>
         public string GetToken()
         {
             // If the token is null or expired, request a new token
@@ -134,13 +120,14 @@
             return this._oauthToken.Token;
         }
 
-        /// <summary>
-        /// Creates a <see cref="WebClient"/> object with the current token
-        /// </summary>
-        /// <returns>Returns an instance of <see cref="WebClient"/></returns>
-        public WebClient CreateRequest()
+        public HttpWebRequest CreateRequest(string url)
         {
-            return this._request.CreateRequest(this.GetToken());
+            return this._request.CreateRequest(url, this.GetToken());
+        }
+
+        public IResponse Send(HttpWebRequest request, HttpMethod method, string payload)
+        {
+            return this._request.Send(request, method, payload);
         }
     }
 }
