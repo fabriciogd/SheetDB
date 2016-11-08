@@ -48,11 +48,13 @@
   <ItemGroup>
     <Compile Include="Authentication\OAuth2.cs" />
     <Compile Include="Helpers\Encode.cs" />
+    <Compile Include="Helpers\Utils.cs" />
     <Compile Include="Implementation\Database.cs" />
     <Compile Include="Implementation\IDatabase.cs" />
     <Compile Include="Implementation\IManagment.cs" />
     <Compile Include="Implementation\ITable.cs" />
     <Compile Include="Implementation\Managment.cs" />
+    <Compile Include="Implementation\Table.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Transport\Connector.cs" />
     <Compile Include="Transport\ConnectorFactory.cs" />
@@ -62,6 +64,7 @@
     <Compile Include="Transport\IResponse.cs" />
     <Compile Include="Transport\RequestFactory.cs" />
     <Compile Include="Transport\Response.cs" />
+    <Compile Include="Transport\ResponseValidator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

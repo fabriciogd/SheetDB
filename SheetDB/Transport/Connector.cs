@@ -17,9 +17,10 @@
 
         private readonly byte[] _privateKey;
 
-        private readonly string _tokenAddress = "https://accounts.google.com/o/oauth2/token";
+        private readonly string _tokenAddress = "https://www.googleapis.com/oauth2/v4/token";
 
         private readonly string _scope = string.Join(" ", new[] {
+            "https://www.googleapis.com/auth/spreadsheets",
             "https://www.googleapis.com/auth/drive",
             "https://www.googleapis.com/auth/drive.file"
         });
@@ -120,9 +121,9 @@
             return this._oauthToken.Token;
         }
 
-        public HttpWebRequest CreateRequest(string url)
+        public HttpWebRequest CreateRequest(string uri)
         {
-            return this._request.CreateRequest(url, this.GetToken());
+            return this._request.CreateRequest(uri, this.GetToken());
         }
 
         public IResponse Send(HttpWebRequest request, HttpMethod method, string payload = "")

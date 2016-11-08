@@ -3,5 +3,7 @@
     public interface IDatabase
     {
         ITable<T> CreateTable<T>(string name) where T : new();
+
+        void Delete();
     }
 }

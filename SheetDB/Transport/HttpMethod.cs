@@ -6,6 +6,8 @@
 
         Post,
 
-        Put
+        Put,
+
+        Delete
     }
 }

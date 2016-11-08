@@ -6,12 +6,14 @@
 
     public class RequestFactory : IRequestFactory
     {
-        public HttpWebRequest CreateRequest(string url, string token)
+        public HttpWebRequest CreateRequest(string uri, string token)
         {
-            var request = (HttpWebRequest)WebRequest.Create(url);
+            var request = (HttpWebRequest)WebRequest.Create(uri);
+
+            request.ContentType = "application/json";
 
             request.Headers.Add("Authorization", "Bearer " + token);
-            request.Headers.Add("GData-Version", "3.0");
+            //request.Headers.Add("GData-Version", "3.0");
 
             return request;
         }

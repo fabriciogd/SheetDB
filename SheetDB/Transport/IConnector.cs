@@ -4,7 +4,7 @@
 
     public interface IConnector
     {
-        HttpWebRequest CreateRequest(string url);
+        HttpWebRequest CreateRequest(string uri);
 
         IResponse Send(HttpWebRequest request, HttpMethod method, string payload = "");
     }

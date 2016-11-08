@@ -4,7 +4,7 @@
 
     public interface IRequestFactory
     {
-        HttpWebRequest CreateRequest(string url, string token);
+        HttpWebRequest CreateRequest(string uri, string token);
 
         IResponse Send(HttpWebRequest request, HttpMethod method, string payload);
     }

@@ -2,7 +2,9 @@
 {
     using Helpers;
     using Newtonsoft.Json;
+    using System;
     using System.Collections.Generic;
+    using System.Net;
     using Transport;
 
     public class Managment : IManagment
@@ -16,38 +18,47 @@
 
         public IDatabase CreateDatabase(string name)
         {
-            var uri = "https://www.googleapis.com/drive/v2/files?convert=true";
+            var database = this.GetDatabase(name);
+
+            if (database != null)
+                throw new Exception("Exists a database with the same name");
+
+            var uri = "https://sheets.googleapis.com/v4/spreadsheets";
 
             var request = this._connector.CreateRequest(uri);
 
-            request.ContentType = "application/json";
-
             var payload = JsonConvert.SerializeObject(new
             {
-                title = name,
-                mimeType = "application/vnd.google-apps.spreadsheet"
+                properties = new
+                {
+                    title = name
+                }
             });
 
-            IResponse response = this._connector.Send(request, HttpMethod.Post, payload);
+            var response = new ResponseValidator(this._connector.Send(request, HttpMethod.Post, payload));
 
-            dynamic data = response.Data<dynamic>();
+            dynamic data = response
+                .Status(HttpStatusCode.OK)
+                .Response.Data<dynamic>();
 
-            var spreadsheetId = (string)data.id;
+            var spreadsheetId = (string)data.spreadsheetId;
 
             return new Database(this._connector, spreadsheetId);
         }
 
         public IDatabase GetDatabase(string name)
         {
-            var uri = string.Format("https://www.googleapis.com/drive/v2/files?q={0}", Encode.UrlEncode(string.Format("title = \"{0}\"", name)));
+            var uri = string.Format("https://www.googleapis.com/drive/v3/files?q={0}", Encode.UrlEncode(string.Format("name = \"{0}\"", name)));
 
             var request = this._connector.CreateRequest(uri);
 
-            IResponse response = this._connector.Send(request, HttpMethod.Get, "");
+            var response = new ResponseValidator(this._connector.Send(request, HttpMethod.Get));
 
-            dynamic data = response.Data<dynamic>();
+            dynamic data = response
+                .Status(HttpStatusCode.OK)
+                .Response.Data<dynamic>();
 
-            var documents = data.items;
+            var documents = data.files;
 
             if (documents.Count == 0)
                 return null;
@@ -59,13 +70,15 @@
 
         public IEnumerable<IDatabase> GetAllDatabases()
         {
-            var uri = string.Format("https://www.googleapis.com/drive/v2/files?q={0}", Encode.UrlEncode(string.Format("mimeType = \"{0}\"", "application/vnd.google-apps.spreadsheet")));
+            var uri = string.Format("https://www.googleapis.com/drive/v3/files?q={0}", Encode.UrlEncode(string.Format("mimeType = \"{0}\"", "application/vnd.google-apps.spreadsheet")));
 
             var request = this._connector.CreateRequest(uri);
 
-            IResponse response = this._connector.Send(request, HttpMethod.Get);
+            var response = new ResponseValidator(this._connector.Send(request, HttpMethod.Get));
 
-            dynamic data = response.Data<dynamic>();
+            dynamic data = response
+                .Status(HttpStatusCode.OK)
+                .Response.Data<dynamic>();
 
             var documents = data.items;
 
