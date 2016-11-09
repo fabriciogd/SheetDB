@@ -26,35 +26,21 @@
 
             var request = this._connector.CreateRequest(uri);
 
-            var sheetId = "1111";
-
             var payload = JsonConvert.SerializeObject(new
             {
-                requests = new[] {
-                    new {
-                        addSheet = new
+                requests = new
+                {
+                    addSheet = new
+                    {
+                        properties = new
                         {
-                            properties = new
+                            title = name,
+                            sheetType = "GRID",
+                            gridProperties = new
                             {
-                                sheetId = sheetId,
-                                title = name,
-                                sheetType = "GRID",
-                                gridProperties = new
-                                {
-                                    rowCount = 1,
-                                    columnCount = fields.Count()
-                                }
+                                rowCount = 1,
+                                columnCount = fields.Count()
                             }
-                        },
-                        appendCells = new
-                        {
-                            sheetId = sheetId,
-                            rows = new[] {
-                                new {
-                                    values = new[] { fields.Select(a => new { userEnteredValue = new { stringValue = a.Name.ToLowerInvariant() } }) }
-                                }
-                            },
-                            fields = "*"
                         }
                     }
                 }
@@ -62,9 +48,34 @@
 
             var response = new ResponseValidator(this._connector.Send(request, HttpMethod.Post, payload));
 
+
             dynamic data = response
                .Status(HttpStatusCode.OK)
                .Response.Data<dynamic>();
+
+            var sheetId = (string)data.replies.First.addSheet.properties.sheetId;
+
+            request = this._connector.CreateRequest(uri);
+
+            payload = JsonConvert.SerializeObject(new
+            {
+                requests = new
+                {
+                    appendCells = new
+                    {
+                        sheetId = sheetId,
+                        rows = new[]
+                        {
+                            new {
+                                values = fields.Select(a => new { userEnteredValue = new { stringValue = a.Name.ToLowerInvariant() } })
+                            }
+                        },
+                        fields = "*"
+                    }
+                }
+            });
+
+            response = new ResponseValidator(this._connector.Send(request, HttpMethod.Post, payload));
 
             return new Table<T>(this._connector, this._spreadsheetId, sheetId);
         }
