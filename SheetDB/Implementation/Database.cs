@@ -1,5 +1,6 @@
 ﻿namespace SheetDB.Implementation
 {
+    using Enum;
     using Helpers;
     using Newtonsoft.Json;
     using System.Linq;
@@ -16,6 +17,28 @@
         {
             this._connector = connector;
             this._spreadsheetId = spreadsheetId;
+        }
+
+        public ITable<T> GetTable<T>(string name) where T : new()
+        {
+            var uri = string.Format("https://sheets.googleapis.com/v4/spreadsheets/{0}?includeGridData=false", this._spreadsheetId);
+
+            var request = this._connector.CreateRequest(uri);
+
+            var response = new ResponseValidator(this._connector.Send(request, HttpMethod.Get));
+
+            dynamic data = response
+                   .Status(HttpStatusCode.OK)
+                   .Response.Data<dynamic>();
+
+            var sheets = data.sheets;
+
+            if (sheets.Count > 0)
+                foreach (var sheet in sheets)
+                    if (sheet.properties.title == name)
+                        return new Table<T>(this._connector, this._spreadsheetId, (string)sheet.properties.sheetId);
+
+            return null;
         }
 
         public ITable<T> CreateTable<T>(string name) where T : new()
@@ -48,34 +71,11 @@
 
             var response = new ResponseValidator(this._connector.Send(request, HttpMethod.Post, payload));
 
-
             dynamic data = response
-               .Status(HttpStatusCode.OK)
-               .Response.Data<dynamic>();
+                   .Status(HttpStatusCode.OK)
+                   .Response.Data<dynamic>();
 
             var sheetId = (string)data.replies.First.addSheet.properties.sheetId;
-
-            request = this._connector.CreateRequest(uri);
-
-            payload = JsonConvert.SerializeObject(new
-            {
-                requests = new
-                {
-                    appendCells = new
-                    {
-                        sheetId = sheetId,
-                        rows = new[]
-                        {
-                            new {
-                                values = fields.Select(a => new { userEnteredValue = new { stringValue = a.Name.ToLowerInvariant() } })
-                            }
-                        },
-                        fields = "*"
-                    }
-                }
-            });
-
-            response = new ResponseValidator(this._connector.Send(request, HttpMethod.Post, payload));
 
             return new Table<T>(this._connector, this._spreadsheetId, sheetId);
         }
@@ -91,5 +91,56 @@
             response
                .Status(HttpStatusCode.NoContent);
         }
+
+        public IDatabase AddPermission(string email, Role role, SheetDB.Enum.Type type)
+        {
+            var uri = string.Format("https://www.googleapis.com/drive/v3/files/{0}/permissions", this._spreadsheetId);
+
+            var request = this._connector.CreateRequest(uri);
+
+            var payload = JsonConvert.SerializeObject(new
+            {
+                role = System.Enum.GetName(typeof(SheetDB.Enum.Role), role),
+                type = System.Enum.GetName(typeof(SheetDB.Enum.Type), type),
+                emailAddress = email
+            });
+
+            var response = new ResponseValidator(this._connector.Send(request, HttpMethod.Post, payload));
+
+            response
+               .Status(HttpStatusCode.OK);
+
+            return this;
+        }
     }
 }
+
+//var response = new ResponseValidator(this._connector.Send(request, HttpMethod.Post, payload));
+
+//dynamic data = response
+//   .Status(HttpStatusCode.OK)
+//   .Response.Data<dynamic>();
+
+//var sheetId = (string)data.replies.First.addSheet.properties.sheetId;
+
+//request = this._connector.CreateRequest(uri);
+
+//payload = JsonConvert.SerializeObject(new
+//            {
+//    requests = new
+//    {
+//        appendCells = new
+//        {
+//            sheetId = sheetId,
+//            rows = new[]
+//            {
+//                            new {
+//                                values = fields.Select(a => new { userEnteredValue = new { stringValue = a.Name.ToLowerInvariant() } })
+//                            }
+//                        },
+//            fields = "*"
+//        }
+//    }
+//            });
+
+//response = new ResponseValidator(this._connector.Send(request, HttpMethod.Post, payload));
