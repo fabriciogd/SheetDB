@@ -6,7 +6,7 @@
     {
         IDatabase AddPermission(string email, Role role, Type type);
 
-        //IDatabasePermission GetPermission(string email);
+        IDatabasePermission GetPermission(string email);
 
         ITable<T> CreateTable<T>(string name) where T : new();
 

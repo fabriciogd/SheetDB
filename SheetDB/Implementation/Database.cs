@@ -2,6 +2,7 @@
 {
     using Enum;
     using Helpers;
+    using Model;
     using Newtonsoft.Json;
     using System.Linq;
     using System.Net;
@@ -111,6 +112,35 @@
                .Status(HttpStatusCode.OK);
 
             return this;
+        }
+
+        public IDatabasePermission GetPermission(string email)
+        {
+            var fields = Encode.UrlEncode("emailAddress,id,role,type");
+
+            var uri = string.Format("https://www.googleapis.com/drive/v3/files/{0}/permissions?fields=permissions({1})", this._spreadsheetId, fields);
+
+            var request = this._connector.CreateRequest(uri);
+
+            var response = new ResponseValidator(this._connector.Send(request, HttpMethod.Get));
+
+            dynamic data = response
+                  .Status(HttpStatusCode.OK)
+                  .Response.Data<dynamic>();
+
+            var permissions = data.permissions;
+
+            if (permissions.Count > 0)
+                foreach (var permission in permissions)
+                    if (permission.emailAddress == email)
+                    {
+                        var role = (Role)System.Enum.Parse(typeof(Role), (string)permission.role, true);
+                        var type = (Type)System.Enum.Parse(typeof(Type), (string)permission.type, true);
+
+                        return new DatabasePermission(this._connector, new Permission(permission.emailAddress, role, type), this._spreadsheetId, (string)permission.id);
+                    }
+
+            return null;
         }
     }
 }

@@ -22,7 +22,10 @@
         private readonly string _scope = string.Join(" ", new[] {
             "https://www.googleapis.com/auth/spreadsheets",
             "https://www.googleapis.com/auth/drive",
-            "https://www.googleapis.com/auth/drive.file"
+            "https://www.googleapis.com/auth/drive.file",
+            "https://www.googleapis.com/auth/drive.readonly",
+            "https://www.googleapis.com/auth/drive.metadata",
+            "https://www.googleapis.com/auth/drive.metadata.readonly"
         });
 
         private readonly DateTime _zeroDate = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
