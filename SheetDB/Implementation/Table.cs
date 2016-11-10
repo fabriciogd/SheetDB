@@ -17,5 +17,10 @@
             this._spreadsheetId = spreadsheetId;
             this._worksheetId = worksheetId;
         }
+
+        public void Delete()
+        {
+
+        }
     }
 }

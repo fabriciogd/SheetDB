@@ -2,5 +2,6 @@
 {
     public interface ITable<T>
     {
+        void Delete();
     }
 }

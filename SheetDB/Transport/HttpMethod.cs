@@ -8,6 +8,8 @@
 
         Put,
 
+        Patch,
+
         Delete
     }
 }

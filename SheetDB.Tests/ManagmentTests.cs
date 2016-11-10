@@ -95,6 +95,30 @@
 
             managment.GetDatabase("Teste").GetPermission("fabriciodupont@hotmail.com");
         }
+
+        [TestMethod]
+        public void Delete_Permission()
+        {
+            var managment = new Managment(
+                clientEmail: "teste-502@subtle-girder-125713.iam.gserviceaccount.com",
+                privateKey: File.ReadAllBytes(System.IO.Directory.GetCurrentDirectory() + "\\SheetDB.p12")
+            );
+
+            managment.GetDatabase("Teste").GetPermission("fabriciodupont@hotmail.com").Delete();
+        }
+
+        [TestMethod]
+        public void Update_Permission()
+        {
+            var managment = new Managment(
+                clientEmail: "teste-502@subtle-girder-125713.iam.gserviceaccount.com",
+                privateKey: File.ReadAllBytes(System.IO.Directory.GetCurrentDirectory() + "\\SheetDB.p12")
+            );
+
+            managment.GetDatabase("Teste").GetPermission("fabriciodupont@hotmail.com").Update(Enum.Role.writer);
+        }
+
+
     }
 
     public class Pessoa

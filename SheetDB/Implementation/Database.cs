@@ -22,7 +22,9 @@
 
         public ITable<T> GetTable<T>(string name) where T : new()
         {
-            var uri = string.Format("https://sheets.googleapis.com/v4/spreadsheets/{0}?includeGridData=false", this._spreadsheetId);
+            var fields = Encode.UrlEncode("sheetId,title");
+
+            var uri = string.Format("https://sheets.googleapis.com/v4/spreadsheets/{0}?includeGridData=false&fields=sheets.properties({1})", this._spreadsheetId, fields);
 
             var request = this._connector.CreateRequest(uri);
 
@@ -44,7 +46,14 @@
 
         public ITable<T> CreateTable<T>(string name) where T : new()
         {
-            var uri = string.Format("https://sheets.googleapis.com/v4/spreadsheets/{0}:batchUpdate", this._spreadsheetId);
+            var table = this.GetTable<T>(name);
+
+            if (table != null)
+                throw new System.Exception("Exists a table with the same name");
+
+            var field = Encode.UrlEncode("replies.addSheet.properties.sheetId");
+
+            var uri = string.Format("https://sheets.googleapis.com/v4/spreadsheets/{0}:batchUpdate?fields={1}", this._spreadsheetId, field);
 
             var fields = Utils.GetFields<T>();
 
@@ -137,7 +146,7 @@
                         var role = (Role)System.Enum.Parse(typeof(Role), (string)permission.role, true);
                         var type = (Type)System.Enum.Parse(typeof(Type), (string)permission.type, true);
 
-                        return new DatabasePermission(this._connector, new Permission(permission.emailAddress, role, type), this._spreadsheetId, (string)permission.id);
+                        return new DatabasePermission(this._connector, new Permission((string)permission.emailAddress, role, type), this._spreadsheetId, (string)permission.id);
                     }
 
             return null;

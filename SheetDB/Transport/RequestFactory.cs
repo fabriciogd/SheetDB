@@ -20,7 +20,7 @@
 
         public IResponse Send(HttpWebRequest request, HttpMethod method, string payload)
         {
-            request.Method = method.ToString();
+            request.Method = method.ToString().ToUpper();
 
             if (!string.IsNullOrEmpty(payload))
             {
