@@ -118,7 +118,38 @@
             managment.GetDatabase("Teste").GetPermission("fabriciodupont@hotmail.com").Update(Enum.Role.writer);
         }
 
+        [TestMethod]
+        public void Delete_table()
+        {
+            var managment = new Managment(
+               clientEmail: "teste-502@subtle-girder-125713.iam.gserviceaccount.com",
+               privateKey: File.ReadAllBytes(System.IO.Directory.GetCurrentDirectory() + "\\SheetDB.p12")
+           );
 
+            managment.GetDatabase("Teste").GetTable<Pessoa>("Teste").Delete();
+        }
+
+        [TestMethod]
+        public void Rename_table()
+        {
+            var managment = new Managment(
+               clientEmail: "teste-502@subtle-girder-125713.iam.gserviceaccount.com",
+               privateKey: File.ReadAllBytes(System.IO.Directory.GetCurrentDirectory() + "\\SheetDB.p12")
+           );
+
+            managment.GetDatabase("Teste").GetTable<Pessoa>("Teste").Rename("Teste2");
+        }
+
+        [TestMethod]
+        public void Add_Record()
+        {
+            var managment = new Managment(
+               clientEmail: "teste-502@subtle-girder-125713.iam.gserviceaccount.com",
+               privateKey: File.ReadAllBytes(System.IO.Directory.GetCurrentDirectory() + "\\SheetDB.p12")
+           );
+
+            managment.GetDatabase("Teste").GetTable<Pessoa>("Teste").Add(new Pessoa() { Id = 1, Nome = "a" });
+        }
     }
 
     public class Pessoa

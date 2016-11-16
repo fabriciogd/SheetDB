@@ -55,9 +55,11 @@
     <Compile Include="Implementation\IDatabase.cs" />
     <Compile Include="Implementation\IManagment.cs" />
     <Compile Include="Implementation\IDatabasePermission.cs" />
+    <Compile Include="Implementation\IRow.cs" />
     <Compile Include="Implementation\ITable.cs" />
     <Compile Include="Implementation\Managment.cs" />
     <Compile Include="Implementation\DatabasePermission.cs" />
+    <Compile Include="Implementation\Row.cs" />
     <Compile Include="Implementation\Table.cs" />
     <Compile Include="Model\Permission.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
