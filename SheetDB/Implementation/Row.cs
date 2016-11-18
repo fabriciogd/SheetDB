@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SheetDB.Helpers;
 using SheetDB.Transport;
 using System.Net;
 
@@ -11,13 +12,16 @@ namespace SheetDB.Implementation
 
         private readonly string _spreadsheetId;
 
+        private readonly string _worksheetId;
+
         private readonly string _range;
 
-        public Row(IConnector connector, T element, string spreadsheetId, string range)
+        public Row(IConnector connector, T element, string spreadsheetId, string worksheetId, string range)
         {
             this._connector = connector;
             this.Element = element;
             this._spreadsheetId = spreadsheetId;
+            this._worksheetId = worksheetId;
             this._range = range;
         }
 
@@ -27,13 +31,21 @@ namespace SheetDB.Implementation
 
             var request = this._connector.CreateRequest(uri);
 
+            var index = Utils.A1ToRowIndex(this._range);
+
             var payload = JsonConvert.SerializeObject(new
             {
                 requests = new
                 {
-                    deleteNamedRange = new
+                    deleteDimension = new
                     {
-                        namedRangeId = this._range
+                        range = new
+                        {
+                            sheetId = this._worksheetId,
+                            dimension = "ROWS",
+                            startIndex = index - 1,
+                            endIndex = index,
+                        }
                     }
                 }
             });

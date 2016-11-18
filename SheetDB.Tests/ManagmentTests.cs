@@ -159,7 +159,7 @@
                privateKey: File.ReadAllBytes(System.IO.Directory.GetCurrentDirectory() + "\\SheetDB.p12")
            );
 
-            managment.GetDatabase("Teste").GetTable<Pessoa>("Teste").Add(new Pessoa() { Id = 1, Nome = "b" }).Delete();
+            managment.GetDatabase("Teste").GetTable<Pessoa>("Teste").Add(new Pessoa() { Id = 1, Nome = "c" }).Delete();
         }
     }
 

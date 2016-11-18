@@ -103,7 +103,7 @@
 
             var range = (string)data.updates.updatedRange;
 
-            return new Row<T>(this._connector, record, this._spreadsheetId, range);
+            return new Row<T>(this._connector, record, this._spreadsheetId, this._worksheetId, range);
         }
     }
 }
