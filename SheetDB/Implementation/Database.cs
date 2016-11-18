@@ -89,6 +89,7 @@
             var sheetId = (string)data.replies.First.addSheet.properties.sheetId;
 
             this.AddHeader<T>(sheetId);
+            //this.AddFormatRules<T>(sheetId);
 
             return new Table<T>(this._connector, name, this._spreadsheetId, sheetId);
         }
@@ -167,30 +168,70 @@
             {
                 requests = new
                 {
-                    updateCells = new
+                    appendCells = new
                     {
-                        start = new
-                        {
-                            sheetId = sheetId,
-                            rowIndex = 0,
-                            columnIndex = 0
-                        },
+                        sheetId = sheetId,
                         rows = new[]
                         {
                             new {
                                 values = fields.Select(a => new {
                                     userEnteredValue = new {
                                         stringValue = a.Name.ToLowerInvariant()
-                                    },
-                                    userEnteredFormat =  new {
+                                    }/*,
+                                    userEnteredFormat = new {
                                         textFormat = new {
                                             bold = true
                                         }
-                                    }
+                                    }*/
                                 })
                             }
                         },
-                        fields = "userEnteredValue,userEnteredFormat.textFormat.bold"
+                        fields = "userEnteredValue"
+                    }
+                }
+            });
+
+            var response = new ResponseValidator(this._connector.Send(request, HttpMethod.Post, payload));
+
+            response
+                .Status(HttpStatusCode.OK);
+        }
+
+        private void AddFormatRules<T>(string sheetId)
+        {
+            var uri = string.Format("https://sheets.googleapis.com/v4/spreadsheets/{0}:batchUpdate", this._spreadsheetId);
+
+            var fields = Utils.GetFields<T>();
+
+            var request = this._connector.CreateRequest(uri);
+
+            var payload = JsonConvert.SerializeObject(new
+            {
+                requests = new
+                {
+                    repeatCell = new
+                    {
+                        range = new
+                        {
+                            sheetId = sheetId,
+                            startRowIndex = 1
+                        },
+                        cell = new
+                        {
+                            effectiveFormat = new
+                            {
+                                numberFormat = new
+                                {
+                                    type = "CURRENCY",
+                                    pattern = "$#,##0.00"
+                                },
+                                textFormat = new
+                                {
+                                    bold = true
+                                }
+                            }
+                        },
+                        fields = "effectiveFormat"
                     }
                 }
             });
