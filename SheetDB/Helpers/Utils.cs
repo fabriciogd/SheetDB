@@ -15,9 +15,16 @@
 
         public static int A1ToRowIndex(string range)
         {
-            var match = new Regex(@"[A-Z](\d+)").Match(range);
+            var match = new Regex(@"[a-z](\d+)", RegexOptions.IgnoreCase).Match(range);
 
             return Convert.ToInt32(match.Groups[1].Value);
+        }
+
+        public static String A1Notation(string range)
+        {
+            var match = new Regex(@"(^[a-z]+\d*?![a-z]+\d+)", RegexOptions.IgnoreCase).Match(range);
+
+            return Convert.ToString(match.Groups[1].Value);
         }
     }
 }

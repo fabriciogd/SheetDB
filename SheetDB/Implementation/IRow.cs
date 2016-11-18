@@ -3,5 +3,7 @@
     public interface IRow<T>
     {
         void Delete();
+
+        IRow<T> Update(T record);
     }
 }

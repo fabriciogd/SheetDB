@@ -1,10 +1,11 @@
-﻿using Newtonsoft.Json;
-using SheetDB.Helpers;
-using SheetDB.Transport;
-using System.Net;
-
-namespace SheetDB.Implementation
+﻿namespace SheetDB.Implementation
 {
+    using Newtonsoft.Json;
+    using SheetDB.Helpers;
+    using SheetDB.Transport;
+    using System.Linq;
+    using System.Net;
+
     public class Row<T> : IRow<T> where T : new()
     {
         private readonly IConnector _connector;
@@ -54,6 +55,35 @@ namespace SheetDB.Implementation
 
             response
                 .Status(HttpStatusCode.OK);
+        }
+
+        public IRow<T> Update(T record)
+        {
+            var queryParameters = "valueInputOption=RAW";
+
+            var a1Notation = Utils.A1Notation(this._range);
+
+            var uri = string.Format("https://sheets.googleapis.com/v4/spreadsheets/{0}/values/{1}?{2}", this._spreadsheetId, a1Notation, queryParameters);
+
+            var request = this._connector.CreateRequest(uri);
+
+            var fields = Utils.GetFields<T>();
+
+            var payload = JsonConvert.SerializeObject(new
+            {
+                values = new[] {
+                    fields.Select(a => a.GetValue(record, null).ToString())
+                }
+            });
+
+            var response = new ResponseValidator(this._connector.Send(request, HttpMethod.Put, payload));
+
+            response
+                 .Status(HttpStatusCode.OK);
+
+            this.Element = record;
+
+            return this;
         }
     }
 }

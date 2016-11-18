@@ -161,6 +161,17 @@
 
             managment.GetDatabase("Teste").GetTable<Pessoa>("Teste").Add(new Pessoa() { Id = 1, Nome = "c" }).Delete();
         }
+
+        [TestMethod]
+        public void Update_Record()
+        {
+            var managment = new Managment(
+               clientEmail: "teste-502@subtle-girder-125713.iam.gserviceaccount.com",
+               privateKey: File.ReadAllBytes(System.IO.Directory.GetCurrentDirectory() + "\\SheetDB.p12")
+           );
+
+            managment.GetDatabase("Teste").GetTable<Pessoa>("Teste").Add(new Pessoa() { Id = 1, Nome = "c" }).Update(new Pessoa() { Id = 2, Nome = "d" });
+        }
     }
 
     public class Pessoa
