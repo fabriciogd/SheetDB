@@ -88,7 +88,7 @@
 
             var sheetId = (string)data.replies.First.addSheet.properties.sheetId;
 
-            this.InsertHeader<T>(sheetId);
+            this.AddHeader<T>(sheetId);
 
             return new Table<T>(this._connector, name, this._spreadsheetId, sheetId);
         }
@@ -155,7 +155,7 @@
             return null;
         }
 
-        private void InsertHeader<T>(string sheetId)
+        private void AddHeader<T>(string sheetId)
         {
             var uri = string.Format("https://sheets.googleapis.com/v4/spreadsheets/{0}:batchUpdate", this._spreadsheetId);
 
