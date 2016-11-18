@@ -71,8 +71,9 @@
                             sheetType = "GRID",
                             gridProperties = new
                             {
-                                rowCount = 1,
-                                columnCount = fields.Count()
+                                columnCount = fields.Count(),
+                                frozenRowCount = 1,
+                                rowCount = 2
                             }
                         }
                     }
@@ -86,6 +87,8 @@
                    .Response.Data<dynamic>();
 
             var sheetId = (string)data.replies.First.addSheet.properties.sheetId;
+
+            this.InsertHeader<T>(sheetId);
 
             return new Table<T>(this._connector, name, this._spreadsheetId, sheetId);
         }
@@ -150,6 +153,52 @@
                     }
 
             return null;
+        }
+
+        private void InsertHeader<T>(string sheetId)
+        {
+            var uri = string.Format("https://sheets.googleapis.com/v4/spreadsheets/{0}:batchUpdate", this._spreadsheetId);
+
+            var fields = Utils.GetFields<T>();
+
+            var request = this._connector.CreateRequest(uri);
+
+            var payload = JsonConvert.SerializeObject(new
+            {
+                requests = new
+                {
+                    updateCells = new
+                    {
+                        start = new
+                        {
+                            sheetId = sheetId,
+                            rowIndex = 0,
+                            columnIndex = 0
+                        },
+                        rows = new[]
+                        {
+                            new {
+                                values = fields.Select(a => new {
+                                    userEnteredValue = new {
+                                        stringValue = a.Name.ToLowerInvariant()
+                                    },
+                                    userEnteredFormat =  new {
+                                        textFormat = new {
+                                            bold = true
+                                        }
+                                    }
+                                })
+                            }
+                        },
+                        fields = "userEnteredValue,userEnteredFormat.textFormat.bold"
+                    }
+                }
+            });
+
+            var response = new ResponseValidator(this._connector.Send(request, HttpMethod.Post, payload));
+
+            response
+                .Status(HttpStatusCode.OK);
         }
     }
 }

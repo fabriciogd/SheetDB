@@ -61,6 +61,7 @@
     <Compile Include="Implementation\DatabasePermission.cs" />
     <Compile Include="Implementation\Row.cs" />
     <Compile Include="Implementation\Table.cs" />
+    <Compile Include="Linq\Query.cs" />
     <Compile Include="Model\Permission.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Transport\Connector.cs" />
