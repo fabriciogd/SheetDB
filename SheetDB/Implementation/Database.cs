@@ -39,7 +39,7 @@
             if (sheets.Count > 0)
                 foreach (var sheet in sheets)
                     if (sheet.properties.title == name)
-                        return new Table<T>(this._connector, this._spreadsheetId, (string)sheet.properties.sheetId);
+                        return new Table<T>(this._connector, name, this._spreadsheetId, (string)sheet.properties.sheetId);
 
             return null;
         }
@@ -87,7 +87,7 @@
 
             var sheetId = (string)data.replies.First.addSheet.properties.sheetId;
 
-            return new Table<T>(this._connector, this._spreadsheetId, sheetId);
+            return new Table<T>(this._connector, name, this._spreadsheetId, sheetId);
         }
 
         public void Delete()
@@ -153,33 +153,3 @@
         }
     }
 }
-
-//var response = new ResponseValidator(this._connector.Send(request, HttpMethod.Post, payload));
-
-//dynamic data = response
-//   .Status(HttpStatusCode.OK)
-//   .Response.Data<dynamic>();
-
-//var sheetId = (string)data.replies.First.addSheet.properties.sheetId;
-
-//request = this._connector.CreateRequest(uri);
-
-//payload = JsonConvert.SerializeObject(new
-//            {
-//    requests = new
-//    {
-//        appendCells = new
-//        {
-//            sheetId = sheetId,
-//            rows = new[]
-//            {
-//                            new {
-//                                values = fields.Select(a => new { userEnteredValue = new { stringValue = a.Name.ToLowerInvariant() } })
-//                            }
-//                        },
-//            fields = "*"
-//        }
-//    }
-//            });
-
-//response = new ResponseValidator(this._connector.Send(request, HttpMethod.Post, payload));

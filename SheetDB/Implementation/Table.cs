@@ -15,9 +15,12 @@
 
         private readonly string _worksheetId;
 
-        public Table(IConnector connector, string spreadsheetId, string worksheetId)
+        private readonly string _name;
+
+        public Table(IConnector connector, string name, string spreadsheetId, string worksheetId)
         {
             this._connector = connector;
+            this._name = name;
             this._spreadsheetId = spreadsheetId;
             this._worksheetId = worksheetId;
         }
@@ -77,7 +80,9 @@
 
         public IRow<T> Add(T record)
         {
-            var uri = string.Format("https://sheets.googleapis.com/v4/spreadsheets/{0}:batchUpdate", this._spreadsheetId);
+            var queryParameters = "insertDataOption=INSERT_ROWS&valueInputOption=RAW";
+
+            var uri = string.Format("https://sheets.googleapis.com/v4/spreadsheets/{0}/values/{1}:append?{2}", this._spreadsheetId, this._name, queryParameters);
 
             var request = this._connector.CreateRequest(uri);
 
@@ -85,19 +90,8 @@
 
             var payload = JsonConvert.SerializeObject(new
             {
-                requests = new
-                {
-                    appendCells = new
-                    {
-                        sheetId = this._worksheetId,
-                        rows = new[]
-                        {
-                            new {
-                                values = fields.Select(a => new { userEnteredValue = new { stringValue = a.GetValue(record, null).ToString()} })
-                            }
-                        },
-                        fields = "*"
-                    }
+                values = new[] {
+                    fields.Select(a => a.GetValue(record, null).ToString())
                 }
             });
 
@@ -107,7 +101,9 @@
                  .Status(HttpStatusCode.OK)
                  .Response.Data<dynamic>();
 
-            return new Row<T>(record);
+            var range = (string)data.updates.updatedRange;
+
+            return new Row<T>(this._connector, record, this._spreadsheetId, range);
         }
     }
 }

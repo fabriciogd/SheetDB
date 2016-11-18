@@ -2,5 +2,6 @@
 {
     public interface IRow<T>
     {
+        void Delete();
     }
 }
