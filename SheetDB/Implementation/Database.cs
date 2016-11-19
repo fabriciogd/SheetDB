@@ -180,7 +180,7 @@
                                 })
                             }
                         },
-                        fields = "userEnteredValue.userEnteredValue.stringValue"
+                        fields = "userEnteredValue.stringValue"
                     }
                 }
             });
