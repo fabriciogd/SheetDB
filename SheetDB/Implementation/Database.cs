@@ -72,6 +72,7 @@
                             gridProperties = new
                             {
                                 columnCount = fields.Count(),
+                                frozenRowCount = 1,
                                 rowCount = 2
                             }
                         }
@@ -88,7 +89,6 @@
             var sheetId = (string)data.replies.First.addSheet.properties.sheetId;
 
             this.AddHeader<T>(sheetId);
-            this.AddFormatRules<T>(sheetId);
 
             return new Table<T>(this._connector, name, this._spreadsheetId, sheetId);
         }
@@ -180,40 +180,7 @@
                                 })
                             }
                         },
-                        fields = "userEnteredValue"
-                    }
-                }
-            });
-
-            var response = new ResponseValidator(this._connector.Send(request, HttpMethod.Post, payload));
-
-            response
-                .Status(HttpStatusCode.OK);
-        }
-
-        private void AddFormatRules<T>(string sheetId)
-        {
-            var uri = string.Format("https://sheets.googleapis.com/v4/spreadsheets/{0}:batchUpdate", this._spreadsheetId);
-
-            var fields = Utils.GetFields<T>();
-
-            var request = this._connector.CreateRequest(uri);
-
-            var payload = JsonConvert.SerializeObject(new
-            {
-                requests = new
-                {
-                    updateSheetProperties = new
-                    {
-                        properties = new
-                        {
-                            sheetId = sheetId,
-                            gridProperties = new
-                            {
-                                frozenRowCount = 1
-                            }
-                        },
-                        fields = "gridProperties.frozenRowCount"
+                        fields = "userEnteredValue.userEnteredValue.stringValue"
                     }
                 }
             });
