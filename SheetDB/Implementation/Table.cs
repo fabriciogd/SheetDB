@@ -80,7 +80,7 @@
 
         public IRow<T> Add(T record)
         {
-            var queryParameters = "insertDataOption=INSERT_ROWS&valueInputOption=RAW";
+            var queryParameters = "insertDataOption=INSERT_ROWS&valueInputOption=USER_ENTERED";
 
             var uri = string.Format("https://sheets.googleapis.com/v4/spreadsheets/{0}/values/{1}:append?{2}", this._spreadsheetId, this._name, queryParameters);
 
@@ -91,7 +91,7 @@
             var payload = JsonConvert.SerializeObject(new
             {
                 values = new[] {
-                    fields.Select(a => a.GetValue(record, null).ToString())
+                    fields.Select(a => a.GetValue(record, null))
                 }
             });
 

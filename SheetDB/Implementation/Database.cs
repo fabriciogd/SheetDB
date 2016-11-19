@@ -72,7 +72,6 @@
                             gridProperties = new
                             {
                                 columnCount = fields.Count(),
-                                frozenRowCount = 1,
                                 rowCount = 2
                             }
                         }
@@ -89,7 +88,7 @@
             var sheetId = (string)data.replies.First.addSheet.properties.sheetId;
 
             this.AddHeader<T>(sheetId);
-            //this.AddFormatRules<T>(sheetId);
+            this.AddFormatRules<T>(sheetId);
 
             return new Table<T>(this._connector, name, this._spreadsheetId, sheetId);
         }
@@ -177,12 +176,7 @@
                                 values = fields.Select(a => new {
                                     userEnteredValue = new {
                                         stringValue = a.Name.ToLowerInvariant()
-                                    }/*,
-                                    userEnteredFormat = new {
-                                        textFormat = new {
-                                            bold = true
-                                        }
-                                    }*/
+                                    }
                                 })
                             }
                         },
@@ -209,29 +203,17 @@
             {
                 requests = new
                 {
-                    repeatCell = new
+                    updateSheetProperties = new
                     {
-                        range = new
+                        properties = new
                         {
                             sheetId = sheetId,
-                            startRowIndex = 1
-                        },
-                        cell = new
-                        {
-                            effectiveFormat = new
+                            gridProperties = new
                             {
-                                numberFormat = new
-                                {
-                                    type = "CURRENCY",
-                                    pattern = "$#,##0.00"
-                                },
-                                textFormat = new
-                                {
-                                    bold = true
-                                }
+                                frozenRowCount = 1
                             }
                         },
-                        fields = "effectiveFormat"
+                        fields = "gridProperties.frozenRowCount"
                     }
                 }
             });
