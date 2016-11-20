@@ -167,9 +167,13 @@
             {
                 requests = new
                 {
-                    appendCells = new
+                    updateCells = new
                     {
-                        sheetId = sheetId,
+                        start = new
+                        {
+                            sheetId = sheetId,
+                            rowIndex = 0
+                        },
                         rows = new[]
                         {
                             new {
