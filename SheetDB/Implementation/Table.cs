@@ -1,10 +1,13 @@
 ﻿namespace SheetDB.Implementation
 {
     using Helpers;
+    using Linq;
     using Newtonsoft.Json;
     using SheetDB.Transport;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Net;
+    using System.Text;
 
     public class Table<T> : ITable<T>
         where T : new()
@@ -104,6 +107,61 @@
             var range = (string)data.updates.updatedRange;
 
             return new Row<T>(this._connector, record, this._spreadsheetId, this._worksheetId, range);
+        }
+
+        public IList<IRow<T>> Find(Query query)
+        {
+            var serializedQuery = this.SerializeQuery(query);
+
+            var uri = string.Format("https://sheets.googleapis.com/v4/spreadsheets/{0}/values/{1}?{2}", this._spreadsheetId, this._worksheetId, serializedQuery);
+
+            var request = this._connector.CreateRequest(uri);
+
+            var response = new ResponseValidator(this._connector.Send(request, HttpMethod.Get));
+
+            return null;
+        }
+
+        public IRow<T> GetByIndex(int rowNumber)
+        {
+            var q = new Query
+            {
+                Count = 1,
+                Start = rowNumber,
+            };
+
+            var results = Find(q);
+
+            if (results.Count == 0)
+                return null;
+
+            return results[0];
+        }
+
+
+        private string SerializeQuery(Query q)
+        {
+            var b = new StringBuilder();
+
+            if (q.Where != null)
+                b.Append("sq=" + Encode.UrlEncode(q.Where) + "&");
+
+            if (q.Start > 0)
+                b.Append("start-index=" + q.Start + "&");
+
+            if (q.Count > 0)
+                b.Append("max-results=" + q.Count + "&");
+
+            if (q.Order != null)
+            {
+                if (q.Order.ColumnName != null)
+                    b.Append("orderby=column:" + Encode.UrlEncode(q.Order.ColumnName) + "&");
+
+                if (q.Order.Descending)
+                    b.Append("reverse=true");
+            }
+
+            return b.ToString();
         }
     }
 }
