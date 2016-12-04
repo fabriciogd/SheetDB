@@ -1,13 +1,13 @@
 ﻿namespace SheetDB.Implementation
 {
     using Helpers;
-    using Linq;
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
     using SheetDB.Transport;
-    using System.Collections.Generic;
+    using System;
+    using System.ComponentModel;
     using System.Linq;
     using System.Net;
-    using System.Text;
 
     public class Table<T> : ITable<T>
         where T : new()
@@ -109,59 +109,60 @@
             return new Row<T>(this._connector, record, this._spreadsheetId, this._worksheetId, range);
         }
 
-        public IList<IRow<T>> Find(Query query)
+        public IRow<T> GetByIndex(int rowNumber)
         {
-            var serializedQuery = this.SerializeQuery(query);
+            rowNumber = rowNumber + 1;
 
-            var uri = string.Format("https://sheets.googleapis.com/v4/spreadsheets/{0}/values/{1}?{2}", this._spreadsheetId, this._worksheetId, serializedQuery);
+            var countFields = Utils.GetFields<T>().Count();
+
+            var fieldIndex = ((char)('A' + countFields)).ToString();
+
+            var range = string.Format("{0}!A{1}:{2}{3}", this._name, rowNumber, fieldIndex, rowNumber);
+
+            var uri = string.Format("https://sheets.googleapis.com/v4/spreadsheets/{0}/values/{1}?fields=values&majorDimension=ROWS", this._spreadsheetId, range);
 
             var request = this._connector.CreateRequest(uri);
 
             var response = new ResponseValidator(this._connector.Send(request, HttpMethod.Get));
 
-            return null;
+            dynamic data = response
+                 .Status(HttpStatusCode.OK)
+                 .Response.Data<dynamic>();
+
+            var registro = this.DeserializeElement(data.values.First);
+
+            return new Row<T>(this._connector, registro, this._spreadsheetId, this._worksheetId, range);
         }
 
-        public IRow<T> GetByIndex(int rowNumber)
+        public T DeserializeElement(JArray registro)
         {
-            var q = new Query
+            var setters = registro.Select((e, i) => new
             {
-                Count = 1,
-                Start = rowNumber,
-            };
+                property = typeof(T).GetProperties()[i],
+                rawValue = e,
+            })
+            .Select(e => new
+            {
+                e.property,
+                value = ConvertFrom(e.rawValue, e.property.PropertyType),
+            });
 
-            var results = Find(q);
+            var r = new T();
 
-            if (results.Count == 0)
-                return null;
+            foreach (var setter in setters)
+                setter.property.SetValue(r, setter.value, null);
 
-            return results[0];
+            return r;
         }
 
-
-        private string SerializeQuery(Query q)
+        public object ConvertFrom(object value, Type t)
         {
-            var b = new StringBuilder();
-
-            if (q.Where != null)
-                b.Append("sq=" + Encode.UrlEncode(q.Where) + "&");
-
-            if (q.Start > 0)
-                b.Append("start-index=" + q.Start + "&");
-
-            if (q.Count > 0)
-                b.Append("max-results=" + q.Count + "&");
-
-            if (q.Order != null)
+            if (t.IsGenericType && t.GetGenericTypeDefinition().Equals(typeof(Nullable<>)))
             {
-                if (q.Order.ColumnName != null)
-                    b.Append("orderby=column:" + Encode.UrlEncode(q.Order.ColumnName) + "&");
-
-                if (q.Order.Descending)
-                    b.Append("reverse=true");
+                var nc = new NullableConverter(t);
+                return nc.ConvertFrom(value);
             }
-
-            return b.ToString();
+            return Convert.ChangeType(value, t);
         }
     }
 }

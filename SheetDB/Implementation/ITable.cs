@@ -1,7 +1,4 @@
-﻿using SheetDB.Linq;
-using System.Collections.Generic;
-
-namespace SheetDB.Implementation
+﻿namespace SheetDB.Implementation
 {
     public interface ITable<T>
     {
@@ -10,8 +7,6 @@ namespace SheetDB.Implementation
         ITable<T> Rename(string newName);
 
         IRow<T> Add(T record);
-
-        IList<IRow<T>> Find(Query query);
 
         IRow<T> GetByIndex(int rowNumber);
     }
