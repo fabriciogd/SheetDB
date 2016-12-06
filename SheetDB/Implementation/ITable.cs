@@ -1,4 +1,6 @@
-﻿namespace SheetDB.Implementation
+﻿using System.Collections.Generic;
+
+namespace SheetDB.Implementation
 {
     public interface ITable<T>
     {
@@ -9,5 +11,7 @@
         IRow<T> Add(T record);
 
         IRow<T> GetByIndex(int rowNumber);
+
+        List<IRow<T>> GetAll();
     }
 }

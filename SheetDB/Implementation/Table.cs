@@ -5,6 +5,7 @@
     using Newtonsoft.Json.Linq;
     using SheetDB.Transport;
     using System;
+    using System.Collections.Generic;
     using System.ComponentModel;
     using System.Linq;
     using System.Net;
@@ -132,6 +133,34 @@
             var registro = this.DeserializeElement(data.values.First);
 
             return new Row<T>(this._connector, registro, this._spreadsheetId, this._worksheetId, range);
+        }
+
+        public List<IRow<T>> GetAll()
+        {
+            var countFields = Utils.GetFields<T>().Count();
+
+            var fieldIndex = ((char)('A' + countFields)).ToString();
+
+            var range = string.Format("{0}!A2:{1}", this._name, fieldIndex);
+
+            var uri = string.Format("https://sheets.googleapis.com/v4/spreadsheets/{0}/values/{1}?fields=values&majorDimension=ROWS", this._spreadsheetId, range);
+
+            var request = this._connector.CreateRequest(uri);
+
+            var response = new ResponseValidator(this._connector.Send(request, HttpMethod.Get));
+
+            dynamic data = response
+                 .Status(HttpStatusCode.OK)
+                 .Response.Data<dynamic>();
+
+            JArray registros = data.values;
+
+            return registros.Select((a, i) => new Row<T>(
+                this._connector, 
+                this.DeserializeElement((JArray)a), 
+                this._spreadsheetId, 
+                this._worksheetId,
+                string.Format("{0}!A{1}:{2}{3}", this._name, i + 1, fieldIndex, i + 1))).ToList() as List<IRow<T>>;
         }
 
         public T DeserializeElement(JArray registro)
